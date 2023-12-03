@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Scan QR Code</h1>
+
+    <button id="scanBtn">Scan QR Code</button>
+
+    <script type="text/javascript" src="https://rawgit.com/sitepoint-editors/jsqrcode/master/src/qr_packed.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("scanBtn").addEventListener("click", function () {
+                const video = document.createElement("video");
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(function (err) {
+                        console.log("An error occurred: " + err);
+                    });
+
+                video.addEventListener("loadeddata", function () {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+
+                    setInterval(function () {
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                        try {
+                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                            if (code) {
+                                video.srcObject.getTracks().forEach(track => track.stop());  // Stop the camera
+                                window.location.href = "{% url 'edit_item' item_id=0 %}?qr_code=" + code.data;
+                            }
+                        } catch (e) {
+                            console.log("An error occurred: " + e);
+                        }
+                    }, 1000 / 15);
+                });
+            });
+        });
+    </script>
+{% endblock %}

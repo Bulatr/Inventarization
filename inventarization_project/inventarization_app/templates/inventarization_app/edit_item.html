@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block pagetitle %}Редактирование{% endblock %}
+{% block content %}
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+<a href="{% url 'scan_qr' %}">Scan QR Code</a>
+<script type="text/javascript" src="https://rawgit.com/sitepoint-editors/jsqrcode/master/src/qr_packed.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("scanBtn").addEventListener("click", function () {
+                const video = document.createElement("video");
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(function (err) {
+                        console.log("An error occurred: " + err);
+                    });
+
+                video.addEventListener("loadeddata", function () {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+
+                    setInterval(function () {
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                        try {
+                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                            if (code) {
+                                video.srcObject.getTracks().forEach(track => track.stop());  // Stop the camera
+                                // Заполняем поле Инвентарный номер
+                                document.getElementById("id_inventory_number").value = code.data;
+                            }
+                        } catch (e) {
+                            console.log("An error occurred: " + e);
+                        }
+                    }, 1000 / 15);
+                });
+            });
+        });
+    </script>
+
+    <a href="{% url 'scan_qr' %}">Scan QR Code</a>
+
+    {% if form.instance.qr_code %}
+        <img src="{{ form.instance.qr_code.url }}" alt="QR Code">
+    {% endif %}
+{% endblock %}

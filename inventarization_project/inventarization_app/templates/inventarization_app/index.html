@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block pagetitle %}Инвентаризация 2023{% endblock %}
+{% block content %}
+    {% for index, item in rows_with_index %}
+        <!-- Post item-->
+        <div class="post-item border">
+            <div class="post-item-wrap">
+                <!--
+                <div class="post-image">
+                    <a href="#">
+                        <img alt="" src="images/blog/12.jpg">
+                    </a>
+                    <span class="post-meta-category"><a href="">Lifestyle</a></span>
+                </div>
+                -->
+                <div class="post-item-description">
+                    <span class="post-meta-comments"><strong>Расположение:</strong> {{ item.5 }}</span>
+                    <h2><a href="{% url 'edit_item' forloop.counter %}">{{ item.1 }}
+                        </a></h2>
+                    <p><strong>Наименование по бухгалтерии:</strong> {{ item.4 }}</p>
+                    <span class="post-meta-comments"><strong>Тип оборудования:</strong> {{ item.6 }}</span>
+                    <hr>
+                    <a href="{% url 'edit_item' index %}" class="item-link">Редактировать <i class="icon-chevron-right"></i></a>
+
+                </div>
+            </div>
+        </div>
+        <!-- end: Post item-->
+    {% endfor %}
+{% endblock %}

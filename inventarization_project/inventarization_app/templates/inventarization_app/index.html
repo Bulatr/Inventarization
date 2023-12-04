@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block pagetitle %}Инвентаризация 2023{% endblock %}
 {% block content %}
+<div id="blog" class="grid-layout post-3-columns m-b-30" data-item="post-item"></div>
     {% for index, item in rows_with_index %}
+        {% if forloop.counter >= 2 %}
         <!-- Post item-->
         <div class="post-item border">
             <div class="post-item-wrap">
@@ -14,11 +16,11 @@
                 </div>
                 -->
                 <div class="post-item-description">
-                    <span class="post-meta-comments"><strong>Расположение:</strong> {{ item.5 }}</span>
+                    <span class="post-meta-comments"><strong>Расположение:</strong> {{ item.6 }}</span>
                     <h2><a href="{% url 'edit_item' forloop.counter %}">{{ item.1 }}
                         </a></h2>
-                    <p><strong>Наименование по бухгалтерии:</strong> {{ item.4 }}</p>
-                    <span class="post-meta-comments"><strong>Тип оборудования:</strong> {{ item.6 }}</span>
+                    <p><strong>Наименование по бухгалтерии:</strong> {{ item.5 }}</p>
+                    <span class="post-meta-comments"><strong>Тип оборудования:</strong> {{ item.7 }}</span>
                     <hr>
                     <a href="{% url 'edit_item' index %}" class="item-link">Редактировать <i class="icon-chevron-right"></i></a>
 
@@ -26,5 +28,7 @@
             </div>
         </div>
         <!-- end: Post item-->
+        {% endif %}
     {% endfor %}
+</div>
 {% endblock %}

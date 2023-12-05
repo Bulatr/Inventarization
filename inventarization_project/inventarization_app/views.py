@@ -113,15 +113,22 @@ def edit_item(request, item_id):
         # Открываем таблицу
         worksheet = gc.open_by_key(spreadsheet_name).worksheet(sheet_name)
         # Получаем данные по индексу строки
-        row_data = worksheet.row_values(int(item_id))
+        row_data = worksheet.row_values(int(item_id)+1)
         # Проверяем, что строка существует
         if not row_data:
             raise Http404("Строка не найдена")
 
         # Заполняем форму данными из строки
         form = InventoryItemForm(initial={
+            'number': row_data[0],
             'inventory_number': row_data[1],
             'new_number': row_data[2],
+            'previous_year_number': row_data[3],
+            'match_with_accounting': row_data[5],
+            'location': row_data[6],
+            'equipment_type': row_data[7],
+            'model_if_not_matching': row_data[4]
+
             # Добавьте другие поля по необходимости
         })
 

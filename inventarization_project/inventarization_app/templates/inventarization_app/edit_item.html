@@ -3,12 +3,12 @@
 {% block content %}
 <div class="page-content">
     <div class="card">
-        <form method="post" action="">
+        <form method="post" action="" class="form">
             {% csrf_token %}
-            {{ form.as_p}}
-            <button type="submit">Сохранить</button>
+            {{ form|bootstrap}}
+            <button type="submit" class="btn btn-primary">Сохранить</button>
         </form>
-        <a href="{% url 'scan_qr' %}">Scan QR Code</a>
+        <a href="{% url 'scan_qr' %}" class="btn btn-secondary">Scan QR Code</a>
     </div>
 </div>
 <script type="text/javascript" src="https://rawgit.com/sitepoint-editors/jsqrcode/master/src/qr_packed.js"></script>

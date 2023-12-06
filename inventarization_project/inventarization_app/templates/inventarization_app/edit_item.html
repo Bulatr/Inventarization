@@ -3,12 +3,48 @@
 {% block content %}
 <div class="page-content">
     <div class="card">
-        <form method="post" action="" class="form">
-            {% csrf_token %}
-            {{ form|bootstrap}}
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-        </form>
-        <a href="{% url 'scan_qr' %}" class="btn btn-secondary">Scan QR Code</a>
+        <div class="card-body">
+            <form method="post" action="" class="form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_number">Number:</label>
+                    <input type="number" name="number" class="form-control" value="{{ form_data.number }}" required="" id="id_number">
+                </div>
+                <div class="form-group">
+                    <label for="id_inventory_number">Inventory number:</label>
+                    <input type="text" name="inventory_number" class="form-control"  maxlength="255" value="{{ form_data.inventory_number }}" required="" id="id_inventory_number">
+                </div>
+                <div class="form-group">
+                    <label for="id_new_number">New number:</label>
+                    <input type="text" name="new_number" class="form-control"  maxlength="255" value="{{ form_data.new_number }}" required="" id="id_new_number">
+                </div>
+                <div class="form-group">
+                    <label for="id_previous_year_number">Previous year number:</label>
+                    <input type="text" name="previous_year_number" class="form-control"  maxlength="255" value="{{ form_data.previous_year_number }}" required="" id="id_previous_year_number">
+                </div>
+                <div class="form-group">
+                    <label for="id_match_with_accounting">Match with accounting:</label>
+                    <input type="text" name="match_with_accounting" class="form-control"  value="{{ form_data.match_with_accounting }}"  maxlength="255" required="" id="id_match_with_accounting">
+                </div>
+                <div class="form-group">
+                    <label for="id_location">Location:</label>
+                    <input type="text" name="location" maxlength="255" class="form-control"  value="{{ form_data.location }}" required="" id="id_location">
+                </div>
+                <div class="form-group">
+                    <label for="id_equipment_type">Equipment type:</label>
+                    <input type="text" name="equipment_type"  maxlength="255" class="form-control"  value="{{ form_data.equipment_type }}" required="" id="id_equipment_type">
+                </div>
+                <div class="form-group">
+                    <label for="id_model_if_not_matching">Model if not matching:</label>
+                    <input type="text" name="model_if_not_matching" maxlength="255" class="form-control"  value="{{ form_data.model_if_not_matching }}" required="" id="id_model_if_not_matching">
+                </div>
+    
+                <input type="hidden" name="qr_code" value="{{form_data.qr_code}}" id="id_qr_code">
+    
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </form>
+            <a href="{% url 'scan_qr' %}" class="btn btn-secondary">Scan QR Code</a>
+        </div>
     </div>
 </div>
 <script type="text/javascript" src="https://rawgit.com/sitepoint-editors/jsqrcode/master/src/qr_packed.js"></script>
@@ -57,3 +93,4 @@
     <img src="{{ form.instance.qr_code.url }}" alt="QR Code">
 {% endif %}
 {% endblock %}
+

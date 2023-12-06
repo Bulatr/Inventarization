@@ -119,7 +119,7 @@ def edit_item(request, item_id):
             raise Http404("Строка не найдена")
 
         # Заполняем форму данными из строки
-        form = InventoryItemForm(initial={
+        form_data = {
             'number': row_data[0],
             'inventory_number': row_data[1],
             'new_number': row_data[2],
@@ -130,26 +130,33 @@ def edit_item(request, item_id):
             'model_if_not_matching': row_data[4]
 
             # Добавьте другие поля по необходимости
-        })
+        }
 
         if request.method == 'POST':
             # Если форма отправлена, обрабатываем данные
-            form = InventoryItemForm(request.POST)
+            # Пример обработки данных, может потребоваться реализация по вашим потребностям
+            form_data = {
+                'number': request.POST.get('number'),
+                'inventory_number': request.POST.get('inventory_number'),
+                'new_number': request.POST.get('new_number'),
+                'previous_year_number': request.POST.get('previous_year_number'),
+                'match_with_accounting': request.POST.get('match_with_accounting'),
+                'location': request.POST.get('location'),
+                'equipment_type': request.POST.get('equipment_type'),
+                'model_if_not_matching': request.POST.get('model_if_not_matching')
 
-            if form.is_valid():
-                # Обновляем данные в таблице
-                updated_data = [
-                    form.cleaned_data['inventory_number'],
-                    form.cleaned_data['new_number'],
-                    # Обновите другие поля по необходимости
-                ]
+                # Добавьте другие поля по необходимости
+            }
+            # Обработайте значения других полей по необходимости
 
-                worksheet.update_row(int(item_id), updated_data)
+            # Теперь у вас есть значения, которые вы можете использовать
+            # для обновления данных в Google таблице
 
-                # Перенаправляем на страницу с подробностями после успешного обновления
-                return redirect('item_details', item_id=item_id)
 
-        return render(request, 'inventarization_app/edit_item.html', {'form': form, 'item_id': item_id})
+            # Перенаправляем на страницу с подробностями после успешного обновления
+            return redirect('item_details', item_id=item_id)
+
+        return render(request, 'inventarization_app/edit_item.html', {'form_data': form_data, 'item_id': item_id})
 
     except gspread.exceptions.APIError as e:
         # Обработка ошибок, связанных с API Google Sheets

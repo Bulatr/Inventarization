@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block pagetitle %}Редактирование{% endblock %}
+{% block pagetitle %}Редактирование {{ form_data.inventory_number }}{% endblock %}
 {% block content %}
 <div class="page-content">
     <div class="card">
@@ -45,7 +45,11 @@
     
                 <button type="submit" class="btn btn-primary">Сохранить</button>
             </form>
-            <a href="#" class="btn btn-secondary" id="scanBtn">Scan QR Code</a>
+            <div class="row">
+                <div class="col">
+                    <button type="button" class="btn btn-secondary btn-icon-holder btn-shadow btn-light-hover btn-light-hover" id="scanBtn">Сканировать QR код<i class="icon-camera"></i></button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

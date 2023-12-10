@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="{% static 'inventarization_app/images/favicon.png' %}">   
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <!-- Document title -->
-<title>POLO | The Multi-Purpose HTML5 Template</title>
+<title>Инвентаризация 2023</title>
 <!-- Stylesheets & Fonts -->
 <link href="{% static 'inventarization_app/css/plugins.css' %}" rel="stylesheet">
 <link href="{% static 'inventarization_app/css/style.css' %}" rel="stylesheet">
@@ -666,9 +666,9 @@
                 <h1>{% block pagetitle %}{% endblock %}</h1>
                 <div class="breadcrumb float-left">
                     <ul>
-                        <li><a href="#">Home</a>
+                        <li><a href="{% url 'index' %}">Главная страница</a>
                         </li>
-                        <li><a href="#">Blog</a>
+                        <li><a href="{% url 'edit_item/<int:item_id>/' %}">Blog</a>
                         </li>
                         <li class="active"><a href="#">Infinite Scroll</a>
                         </li>

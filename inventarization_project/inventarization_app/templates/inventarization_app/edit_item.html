@@ -8,35 +8,35 @@
             <form method="post" action="" class="form">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_number">Number:</label>
+                    <label for="id_number">Номер:</label>
                     <input type="number" name="number" class="form-control" value="{{ form_data.number }}" required id="id_number">
                 </div>
                 <div class="form-group">
-                    <label for="id_inventory_number">Inventory number:</label>
+                    <label for="id_inventory_number">Инвентарный номер:</label>
                     <input type="text" name="inventory_number" class="form-control"  maxlength="255" value="{{ form_data.inventory_number }}" required id="id_inventory_number">
                 </div>
                 <div class="form-group">
-                    <label for="id_new_number">New number:</label>
+                    <label for="id_new_number">Новый номер:</label>
                     <input type="text" name="new_number" class="form-control"  maxlength="255" value="{{ form_data.new_number }}" id="id_new_number">
                 </div>
                 <div class="form-group">
-                    <label for="id_previous_year_number">Previous year number:</label>
+                    <label for="id_previous_year_number">Номер присвоенный в прошлом году:</label>
                     <input type="text" name="previous_year_number" class="form-control"  maxlength="255" value="{{ form_data.previous_year_number }}" id="id_previous_year_number">
                 </div>
                 <div class="form-group">
-                    <label for="id_match_with_accounting">Match with accounting:</label>
+                    <label for="id_match_with_accounting">Наименование по списке бухгалтерии:</label>
                     <input type="text" name="match_with_accounting" class="form-control"  value="{{ form_data.match_with_accounting }}"  maxlength="255"  id="id_match_with_accounting">
                 </div>
                 <div class="form-group">
-                    <label for="id_location">Location:</label>
+                    <label for="id_location">Местоположение:</label>
                     <input type="text" name="location" maxlength="255" class="form-control"  value="{{ form_data.location }}" required id="id_location">
                 </div>
                 <div class="form-group">
-                    <label for="id_equipment_type">Equipment type:</label>
+                    <label for="id_equipment_type">Тип оборудования:</label>
                     <input type="text" name="equipment_type"  maxlength="255" class="form-control"  value="{{ form_data.equipment_type }}" required id="id_equipment_type">
                 </div>
                 <div class="form-group">
-                    <label for="id_model_if_not_matching">Model if not matching:</label>
+                    <label for="id_model_if_not_matching">Комментарии и примечания:</label>
                     <input type="text" name="model_if_not_matching" maxlength="255" class="form-control"  value="{{ form_data.model_if_not_matching }}" id="id_model_if_not_matching">
                 </div>
     

@@ -14,6 +14,7 @@
                 <div class="form-group">
                     <label for="id_inventory_number">Инвентарный номер:</label>
                     <input type="text" name="inventory_number" class="form-control"  maxlength="255" value="{{ form_data.inventory_number }}" required id="id_inventory_number">
+                    <div id="inventory_number-error" class="is-invalid">{{error}}</div>
                 </div>
                 <div class="form-group">
                     <label for="id_new_number">Новый номер:</label>

@@ -46,6 +46,12 @@ def edit_item(request, item_id):
         spreadsheet_name = '1954jT48OlyuveDW4qW21796c_1AurAvlN-eYVKm6Zys'
         sheet_name = 'Наш список 2023'
         worksheet = get_worksheet(spreadsheet_name, sheet_name)
+        # Получение инвентарного номера из формы
+        inventory_number = request.POST.get('inventory_number')
+        if not is_inventory_number_unique(worksheet, inventory_number):
+            # Если номер не уникален в Google Sheets, выдать ошибку
+            return render(request, 'inventarization_app/edit_item.html', {'form_data': get_sheet_item(item_id), 'item_id': item_id, 'error': 'Инвентарный номер уже существует в таблице.'})
+        # если не существует записываем в таблицу
         # index_gt нумерация строк начинается с 0, поэтому добавляем 1
         index_gt = item_id+1
         worksheet.update_cell(index_gt, 1, request.POST.get('number'))
@@ -96,6 +102,7 @@ def get_worksheet(spreadsheet_name, sheet_name):
         # Обработка ошибок, связанных с API Google Sheets
         print(f"Ошибка API: {e}")
         raise Http404("Ошибка API Google Sheets")
+
 # возвращает  form_data
 def get_sheet_item(item_id):
     try:
@@ -143,6 +150,13 @@ def get_sheet_item(item_id):
         print(f"Ошибка API: {e}")
         raise Http404("Ошибка API Google Sheets")
 
+def is_inventory_number_unique(worksheet, inventory_number):
+    # Получение всех значений в столбце с инвентарными номерами
+    inventory_numbers_column = worksheet.col_values(2)
+
+    # Проверка уникальности
+    return inventory_number not in inventory_numbers_column
+
 def search(request):
     if request.method == 'GET':
         query = request.GET.get('q')
@@ -151,7 +165,7 @@ def search(request):
 
 def scan_qr(request):
     qr_code_data = request.GET.get('qr_code', '')
-    
+
     if qr_code_data:
         # Создаем временный объект InventoryItem для передачи данных в форму
         temp_item = InventoryItem(qr_code=generate_qr_code(qr_code_data))

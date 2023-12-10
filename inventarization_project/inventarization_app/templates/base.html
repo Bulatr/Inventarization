@@ -668,9 +668,7 @@
                     <ul>
                         <li><a href="{% url 'index' %}">Главная страница</a>
                         </li>
-                        <li><a href="{% url 'edit_item/<int:item_id>/' %}">Blog</a>
-                        </li>
-                        <li class="active"><a href="#">Infinite Scroll</a>
+                        <li  class="active"><a href="{% url 'edit_item' item_id=item.id %}">{% block pagetitle %}{% endblock %}</a>
                         </li>
                     </ul>
                 </div>

@@ -1,13 +1,92 @@
 from django.shortcuts import render
-from .utils import update_google_sheets, generate_qr_code
 from django.shortcuts import render, get_object_or_404, redirect
+from django.template.loader import get_template
+from django.shortcuts import render
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+import qrcode
+from PIL import Image
 from django.http import Http404
+from django.http import HttpResponse
 from .models import InventoryItem
 from .forms import InventoryItemForm
 import gspread
 import os
 from oauth2client.service_account import ServiceAccountCredentials
+from reportlab.lib.pagesizes import A5
 
+def generate_qr_code(data, size):
+    qr = qrcode.QRCode(
+        version=2,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=20,  # Здесь задается размер блока в пикселях
+        border=4,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Изменение размера изображения с учетом размера бумаги
+    img = img.resize((size, size))
+
+    return img
+
+def generate_pdf(request):
+    # Получите все инвентарные номера из вашей модели
+    # Подключение к Google Sheets
+    spreadsheet_name = '1954jT48OlyuveDW4qW21796c_1AurAvlN-eYVKm6Zys'
+    sheet_name = 'Наш список 2023'
+    # Открываем таблицу
+    worksheet = get_worksheet(spreadsheet_name, sheet_name)
+
+    all_rows = get_all_items(worksheet)
+    inventory_items = all_rows
+
+    # Создайте временный файл для сохранения PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="qrcodes.pdf"'
+
+    # Создайте PDF-документ с использованием reportlab
+    # Поменяли ориентацию на горизонтальную
+    width = 30
+    height = 20
+    #p = canvas.Canvas(response, pagesize=landscape((width, height)))
+    p = canvas.Canvas(response, pagesize=landscape(A5))
+    
+
+    # Определите начальные координаты для вывода QR-кодов
+    #x, y = width / 2, height / 2  # Расположение по центру страницы
+    x, y = A5[1] / 2, A5[0] / 2  # Расположение по центру страницы
+
+    for index, item in enumerate(inventory_items, start=1):
+        if index >= 2:
+            inventory_number = item[1]
+            if inventory_number != "":
+                location = item[6]
+                # Создайте QR-код для инвентарного номера
+                qr_code = generate_qr_code(inventory_number, size=30)  # Уменьшили размер QR-кода
+                # проверяем на существование папки
+                qr_codes_dir = os.path.join("media", "qrcodes")
+                os.makedirs(qr_codes_dir, exist_ok=True)
+                # Рисуем QR-код на PDF-документе
+                img_path = os.path.join("media", f"qrcodes/{inventory_number}.png")
+                qr_code.save(img_path)
+                # Устанавливаем шрифт
+                p.setFont("Helvetica", 36)
+                p.drawInlineImage(img_path, x - 100, y - 30, width=200, height=200)  # Изменены размеры QR-кода и координаты
+                
+                # Выводим инвентарный номер и местоположение
+                p.drawCentredString(x, y - 45, inventory_number)
+                p.drawCentredString(x, y - 80, location)
+                y = 0
+
+                if y != A5[0] / 2:  # Изменены координаты по Y
+                    p.showPage()
+                    y = A5[0] / 2  # Изменены начальные координаты по Y
+
+    p.save()
+
+    return response
 
 def index(request):
     # Подключение к Google Sheets
@@ -163,14 +242,4 @@ def search(request):
         items = InventoryItem.objects.filter(inventory_number__icontains=query)
         return render(request, 'inventarization_app/index.html', {'items': items})
 
-def scan_qr(request):
-    qr_code_data = request.GET.get('qr_code', '')
 
-    if qr_code_data:
-        # Создаем временный объект InventoryItem для передачи данных в форму
-        temp_item = InventoryItem(qr_code=generate_qr_code(qr_code_data))
-        form = InventoryItemForm(instance=temp_item)
-    else:
-        form = InventoryItemForm()
-
-    return render(request, 'inventarization_app/scan_qr.html', {'form': form})

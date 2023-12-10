@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .utils import update_google_sheets, generate_qr_code
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import Http404
 from .models import InventoryItem
 from .forms import InventoryItemForm
 import gspread
@@ -10,27 +11,19 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 def index(request):
     # Подключение к Google Sheets
-    # Получить абсолютный путь к текущему файлу (где находится views.py)
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Укажите путь к файлу ключа JSON, полученному при создании сервисного аккаунта в Google Cloud Console
-    json_keyfile = os.path.join(current_dir, 'google', 'inventarization-406909-2d4115d42a80.json')
-
-    # Укажите имя вашего файла Google Spreadsheet
     spreadsheet_name = '1954jT48OlyuveDW4qW21796c_1AurAvlN-eYVKm6Zys'
-
-    # Укажите имена листов и заголовки столбцов
     sheet_name = 'Наш список 2023'
-    columns = ['Номер','Инвентарный номер', 'Новый номер', 'Совпадение с бухгалтерией', 'Местоположение', 'Тип оборудования', 'Модель если не совпадает со списком']
-
-    # Авторизация в Google Sheets API
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_keyfile, scope)
-    gc = gspread.authorize(credentials)
-
     # Открываем таблицу
-    worksheet = gc.open_by_key(spreadsheet_name).worksheet(sheet_name)
+    worksheet = get_worksheet(spreadsheet_name, sheet_name)
 
+    all_rows = get_all_items(worksheet)
+
+    # Передача данных в контекст шаблона
+    context = {'rows_with_index': enumerate(all_rows)}
+
+    return render(request, 'inventarization_app/index.html', context)
+
+def get_all_items(worksheet):
     # Получаем все значения из листа
     all_rows = worksheet.get_all_values()
 
@@ -40,10 +33,9 @@ def index(request):
     # Остальные строки содержат данные
     data = all_rows[1:]
 
-    # Передача данных в контекст шаблона
-    context = {'headers': headers, 'data': data, 'rows_with_index': enumerate(all_rows)}
+    # возвращаем все строки
+    return all_rows
 
-    return render(request, 'inventarization_app/index.html', context)
 
 def edit_item(request, item_id):
     if request.method == 'POST':
@@ -67,7 +59,6 @@ def edit_item(request, item_id):
         # Заново получим эту строку из гугл таблицы
         form_data = get_sheet_item(item_id)
         # Перенаправляем на страницу с подробностями после успешного обновления
-        # ! осталось разобраться с передачей измененных данных
         return render(request, 'inventarization_app/edit_item.html', {'form_data': form_data, 'item_id': item_id})
     else:
         form_data = get_sheet_item(item_id)

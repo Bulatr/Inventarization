@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 {% block pagetitle %}Редактирование {{ form_data.inventory_number }}{% endblock %}
+{% block title_active %}{{ form_data.inventory_number }}{% endblock %}
+
+{% block active_id %}{{ form_data.number }}{% endblock active_id %}
+    
 {% block content %}
 <div class="page-content">
     <div class="card">

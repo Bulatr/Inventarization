@@ -5,7 +5,7 @@
     {% for index, item in rows_with_index %}
         {% if index >= 1 %}
         <!-- Post item-->
-        <div class="post-item border">
+        <div class="post-item border" id="{{ item.0 }}">
             <div class="post-item-wrap">
                 <!--
                 <div class="post-image">

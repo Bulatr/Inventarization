@@ -666,9 +666,9 @@
                 <h1>{% block pagetitle %}{% endblock %}</h1>
                 <div class="breadcrumb float-left">
                     <ul>
-                        <li><a href="{% url 'index' %}">Главная страница</a>
+                        <li><a href="{% url 'index' %}#{% block active_id %}{% endblock %}">Главная страница</a>
                         </li>
-                        <li  class="active"><a href="{% url 'edit_item' item_id=item.id %}">{% block pagetitle %}{% endblock %}</a>
+                        <li  class="active"><a href="#">{% block title_active%}{% endblock %}</a>
                         </li>
                     </ul>
                 </div>

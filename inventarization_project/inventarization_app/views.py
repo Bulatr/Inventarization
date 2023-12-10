@@ -48,7 +48,8 @@ def edit_item(request, item_id):
         worksheet = get_worksheet(spreadsheet_name, sheet_name)
         # Получение инвентарного номера из формы
         inventory_number = request.POST.get('inventory_number')
-        if not is_inventory_number_unique(worksheet, inventory_number):
+        result_string = inventory_number.replace("0", "", 1)
+        if not is_inventory_number_unique(worksheet, result_string):
             # Если номер не уникален в Google Sheets, выдать ошибку
             return render(request, 'inventarization_app/edit_item.html', {'form_data': get_sheet_item(item_id), 'item_id': item_id, 'error': 'Инвентарный номер уже существует в таблице.'})
         # если не существует записываем в таблицу
@@ -153,7 +154,6 @@ def get_sheet_item(item_id):
 def is_inventory_number_unique(worksheet, inventory_number):
     # Получение всех значений в столбце с инвентарными номерами
     inventory_numbers_column = worksheet.col_values(2)
-
     # Проверка уникальности
     return inventory_number not in inventory_numbers_column
 

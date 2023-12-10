@@ -46,6 +46,37 @@ def index(request):
     return render(request, 'inventarization_app/index.html', context)
 
 def edit_item(request, item_id):
+    if request.method == 'POST':
+        # Если форма отправлена, обрабатываем данные
+        # для обновления данных в Google таблице
+        # Обновляем строку в таблице
+        # нужно явно указывать ячейки, ячейки с формулами не трогать
+        spreadsheet_name = '1954jT48OlyuveDW4qW21796c_1AurAvlN-eYVKm6Zys'
+        sheet_name = 'Наш список 2023'
+        worksheet = get_worksheet(spreadsheet_name, sheet_name)
+        # index_gt нумерация строк начинается с 0, поэтому добавляем 1
+        index_gt = item_id+1
+        worksheet.update_cell(index_gt, 1, request.POST.get('number'))
+        worksheet.update_cell(index_gt, 2, request.POST.get('inventory_number'))
+        worksheet.update_cell(index_gt, 4, request.POST.get('new_number'))
+        worksheet.update_cell(index_gt, 7, request.POST.get('location'))
+        worksheet.update_cell(index_gt, 8, request.POST.get('equipment_type'))
+        worksheet.update_cell(index_gt, 9, request.POST.get('model_if_not_matching'))
+
+        # Готовим form_data
+        # Заново получим эту строку из гугл таблицы
+        form_data = get_sheet_item(item_id)
+        # Перенаправляем на страницу с подробностями после успешного обновления
+        # ! осталось разобраться с передачей измененных данных
+        return render(request, 'inventarization_app/edit_item.html', {'form_data': form_data, 'item_id': item_id})
+    else:
+        form_data = get_sheet_item(item_id)
+        return render(request, 'inventarization_app/edit_item.html', {'form_data': form_data, 'item_id': item_id})
+
+
+# Подключение к таблице и получении данных
+# Получение worksheet
+def get_worksheet(spreadsheet_name, sheet_name):
     # Подключение к Google Sheets
     # Получить абсолютный путь к текущему файлу (где находится views.py)
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -58,100 +89,29 @@ def edit_item(request, item_id):
 
     # Укажите имена листов и заголовки столбцов
     sheet_name = 'Наш список 2023'
-    columns = ['Номер','Инвентарный номер', 'Новый номер', 'Присвоенный номер в прошлом году', 'Совпадение с бухгалтерией', 'Местоположение', 'Тип оборудования', 'Модель если не совпадает со списком']
 
     # Авторизация в Google Sheets API
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     credentials = ServiceAccountCredentials.from_json_keyfile_name(json_keyfile, scope)
     gc = gspread.authorize(credentials)
+
     try:
         # Открываем таблицу по имени
         # Открываем таблицу
         worksheet = gc.open_by_key(spreadsheet_name).worksheet(sheet_name)
-        # Получаем данные по индексу строки
-        # Индекс строки начинается с 0, поэтому нужно добавить 1
-        index_gt = int(item_id)+1
-        row_data = worksheet.row_values(index_gt)
-
-        # Проверяем, что строка существует
-        if not row_data:
-            raise Http404("Строка не найдена")
-        if len(row_data) >=7:
-            lenrow_data = len(row_data)
-            location = row_data[6]
-            equipment_type = row_data[7]
-        else:
-            location = ""
-            equipment_type = ""
-        # Заполняем форму данными из строки
-        if len(row_data) >= 9:
-            model_if_not_matching = row_data[8]
-        else:
-            model_if_not_matching = ""
-        form_data = {
-                'number': row_data[0],
-                'inventory_number': row_data[1],
-                'new_number': row_data[3],
-                'previous_year_number': row_data[4],
-                'match_with_accounting': row_data[5],
-                'location': location,
-                'equipment_type': equipment_type,
-                'model_if_not_matching': model_if_not_matching,
-                # Добавьте другие поля по необходимости
-            }
-
-
-        if request.method == 'POST':
-            # Если форма отправлена, обрабатываем данные
-            # для обновления данных в Google таблице
-            # Обновляем строку в таблице
-            # нужно явно указывать ячейки, ячейки с формулами не трогать
-            worksheet.update_cell(index_gt, 1, request.POST.get('number'))
-            worksheet.update_cell(index_gt, 2, request.POST.get('inventory_number'))
-            worksheet.update_cell(index_gt, 4, request.POST.get('new_number'))
-            worksheet.update_cell(index_gt, 7, request.POST.get('location'))
-            worksheet.update_cell(index_gt, 8, request.POST.get('equipment_type'))
-            worksheet.update_cell(index_gt, 9, request.POST.get('model_if_not_matching'))
-
-            # Готовим form_data
-            # Заново получим эту строку из гугл таблицы
-            form_data = get_sheet_item(item_id)
-            # Перенаправляем на страницу с подробностями после успешного обновления
-            # ! осталось разобраться с передачей измененных данных
-            return render(request, 'inventarization_app/edit_item.html', {'form_data': form_data, 'item_id': item_id})
-
-        return render(request, 'inventarization_app/edit_item.html', {'form_data': form_data, 'item_id': item_id})
+        return worksheet
 
     except gspread.exceptions.APIError as e:
         # Обработка ошибок, связанных с API Google Sheets
         print(f"Ошибка API: {e}")
         raise Http404("Ошибка API Google Sheets")
-
-# Подключение к таблице и получении данных
 # возвращает  form_data
 def get_sheet_item(item_id):
-    # Подключение к Google Sheets
-    # Получить абсолютный путь к текущему файлу (где находится views.py)
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Укажите путь к файлу ключа JSON, полученному при создании сервисного аккаунта в Google Cloud Console
-    json_keyfile = os.path.join(current_dir, 'google', 'inventarization-406909-2d4115d42a80.json')
-
-    # Укажите имя вашего файла Google Spreadsheet
-    spreadsheet_name = '1954jT48OlyuveDW4qW21796c_1AurAvlN-eYVKm6Zys'
-
-    # Укажите имена листов и заголовки столбцов
-    sheet_name = 'Наш список 2023'
-
-    # Авторизация в Google Sheets API
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_keyfile, scope)
-    gc = gspread.authorize(credentials)
-
     try:
         # Открываем таблицу по имени
-        # Открываем таблицу
-        worksheet = gc.open_by_key(spreadsheet_name).worksheet(sheet_name)
+        spreadsheet_name = '1954jT48OlyuveDW4qW21796c_1AurAvlN-eYVKm6Zys'
+        sheet_name = 'Наш список 2023'
+        worksheet = get_worksheet(spreadsheet_name, sheet_name)
         # Получаем данные по индексу строки
         # Индекс строки начинается с 0, поэтому нужно добавить 1
         index_gt = int(item_id)+1

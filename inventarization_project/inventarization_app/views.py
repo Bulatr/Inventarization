@@ -13,11 +13,11 @@ from .forms import InventoryItemForm
 import gspread
 import os
 from oauth2client.service_account import ServiceAccountCredentials
-from reportlab.lib.pagesizes import A5
+from reportlab.lib.pagesizes import A4
 
 def generate_qr_code(data, size):
     qr = qrcode.QRCode(
-        version=2,
+        version=4,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=20,  # Здесь задается размер блока в пикселях
         border=4,
@@ -48,23 +48,19 @@ def generate_pdf(request):
 
     # Создайте PDF-документ с использованием reportlab
     # Поменяли ориентацию на горизонтальную
-    width = 30
-    height = 20
-    #p = canvas.Canvas(response, pagesize=landscape((width, height)))
-    p = canvas.Canvas(response, pagesize=landscape(A5))
+    p = canvas.Canvas(response, pagesize=landscape(A4))
     
 
     # Определите начальные координаты для вывода QR-кодов
-    #x, y = width / 2, height / 2  # Расположение по центру страницы
-    x, y = A5[1] / 2, A5[0] / 2  # Расположение по центру страницы
+    x, y = 30, 30
 
     for index, item in enumerate(inventory_items, start=1):
         if index >= 2:
             inventory_number = item[1]
             if inventory_number != "":
-                location = item[6]
+                #location = item[6]
                 # Создайте QR-код для инвентарного номера
-                qr_code = generate_qr_code(inventory_number, size=30)  # Уменьшили размер QR-кода
+                qr_code = generate_qr_code(inventory_number, size=120)  # Уменьшили размер QR-кода
                 # проверяем на существование папки
                 qr_codes_dir = os.path.join("media", "qrcodes")
                 os.makedirs(qr_codes_dir, exist_ok=True)
@@ -72,17 +68,16 @@ def generate_pdf(request):
                 img_path = os.path.join("media", f"qrcodes/{inventory_number}.png")
                 qr_code.save(img_path)
                 # Устанавливаем шрифт
-                p.setFont("Helvetica", 36)
-                p.drawInlineImage(img_path, x - 100, y - 30, width=200, height=200)  # Изменены размеры QR-кода и координаты
-                
+                p.setFont("Helvetica", 14)
+                p.drawInlineImage(img_path, x - 8, y - 5, width=70, height=70)  # Изменены размеры QR-кода и координаты
                 # Выводим инвентарный номер и местоположение
-                p.drawCentredString(x, y - 45, inventory_number)
-                p.drawCentredString(x, y - 80, location)
+                p.drawCentredString(x+30, y - 70, inventory_number)
+                p.drawCentredString(x, y - 15, location)
                 y = 0
 
-                if y != A5[0] / 2:  # Изменены координаты по Y
+                if y != A4[1] / 2:  # Изменены координаты по Y
                     p.showPage()
-                    y = A5[0] / 2  # Изменены начальные координаты по Y
+                    y = A4[0] / 2  # Изменены начальные координаты по Y
 
     p.save()
 

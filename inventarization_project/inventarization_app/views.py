@@ -58,7 +58,7 @@ def generate_pdf(request):
         if index >= 2:
             inventory_number = item[1]
             if inventory_number != "":
-                #location = item[6]
+                location = item[6]
                 # Создайте QR-код для инвентарного номера
                 qr_code = generate_qr_code(inventory_number, size=120)  # Уменьшили размер QR-кода
                 # проверяем на существование папки
@@ -69,15 +69,23 @@ def generate_pdf(request):
                 qr_code.save(img_path)
                 # Устанавливаем шрифт
                 p.setFont("Helvetica", 14)
-                p.drawInlineImage(img_path, x - 8, y - 5, width=70, height=70)  # Изменены размеры QR-кода и координаты
+                p.drawInlineImage(img_path, x - 8, y - A4[0], width=70, height=70)  # Изменены размеры QR-кода и координаты
                 # Выводим инвентарный номер и местоположение
                 p.drawCentredString(x+30, y - 70, inventory_number)
                 p.drawCentredString(x, y - 15, location)
-                y = 0
 
-                if y != A4[1] / 2:  # Изменены координаты по Y
+                # Увеличиваем координаты для следующего блока
+                x += 100  # Изменены координаты по X
+
+                # Переходим на следующую строку после 4 блоков
+                if index % 4 == 0:
+                    x = 30
+                    y += 120  # Изменены координаты по Y
+
+                # Если достигнут конец страницы, добавляем новую страницу
+                if y >= A4[1] - 25:
                     p.showPage()
-                    y = A4[0] / 2  # Изменены начальные координаты по Y
+                    x, y = 30, 30
 
     p.save()
 
